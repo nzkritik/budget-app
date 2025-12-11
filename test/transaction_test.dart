@@ -5,7 +5,7 @@ void main() {
   group('Transaction Model Tests', () {
     test('Transaction creation', () {
       final now = DateTime.now();
-      final transaction = Transaction(
+      final transaction = BudgetTransaction(
         type: 'income',
         amount: 100.0,
         description: 'Test Income',
@@ -23,7 +23,7 @@ void main() {
 
     test('Transaction toMap', () {
       final now = DateTime.now();
-      final transaction = Transaction(
+      final transaction = BudgetTransaction(
         id: 1,
         type: 'expense',
         amount: 50.0,
@@ -55,7 +55,7 @@ void main() {
         'updated_at': now.toIso8601String(),
       };
 
-      final transaction = Transaction.fromMap(map);
+      final transaction = BudgetTransaction.fromMap(map);
       expect(transaction.id, 1);
       expect(transaction.type, 'income');
       expect(transaction.amount, 100.0);
@@ -64,7 +64,7 @@ void main() {
 
     test('Transaction copyWith', () {
       final now = DateTime.now();
-      final transaction = Transaction(
+      final transaction = BudgetTransaction(
         id: 1,
         type: 'income',
         amount: 100.0,

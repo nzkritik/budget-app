@@ -22,7 +22,7 @@ class TransactionsScreen extends StatefulWidget {
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
   DateTime _selectedDate = DateTime.now();
-  List<Transaction> _transactions = [];
+  List<BudgetTransaction> _transactions = [];
   Map<String, double> _stats = {
     'income': 0.0,
     'expenses': 0.0,
@@ -100,7 +100,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     _loadTransactions();
   }
 
-  Future<void> _navigateToEditTransaction(Transaction transaction) async {
+  Future<void> _navigateToEditTransaction(BudgetTransaction transaction) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -113,7 +113,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     _loadTransactions();
   }
 
-  Future<void> _deleteTransaction(Transaction transaction) async {
+  Future<void> _deleteTransaction(BudgetTransaction transaction) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

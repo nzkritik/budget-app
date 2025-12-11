@@ -41,12 +41,12 @@ class DatabaseService {
     ''');
   }
 
-  Future<int> createTransaction(Transaction transaction) async {
+  Future<int> createTransaction(BudgetTransaction transaction) async {
     final db = await database;
     return await db.insert('transactions', transaction.toMap());
   }
 
-  Future<Transaction?> readTransaction(int id) async {
+  Future<BudgetTransaction?> readTransaction(int id) async {
     final db = await database;
     final maps = await db.query(
       'transactions',
@@ -55,18 +55,18 @@ class DatabaseService {
     );
 
     if (maps.isNotEmpty) {
-      return Transaction.fromMap(maps.first);
+      return BudgetTransaction.fromMap(maps.first);
     }
     return null;
   }
 
-  Future<List<Transaction>> readAllTransactions() async {
+  Future<List<BudgetTransaction>> readAllTransactions() async {
     final db = await database;
     final maps = await db.query('transactions', orderBy: 'date DESC');
-    return maps.map((map) => Transaction.fromMap(map)).toList();
+    return maps.map((map) => BudgetTransaction.fromMap(map)).toList();
   }
 
-  Future<List<Transaction>> readTransactionsByMonth(int year, int month) async {
+  Future<List<BudgetTransaction>> readTransactionsByMonth(int year, int month) async {
     final db = await database;
     final startDate = DateTime(year, month, 1).toIso8601String();
     final endDate = DateTime(year, month + 1, 1).toIso8601String();
@@ -78,10 +78,10 @@ class DatabaseService {
       orderBy: 'date DESC',
     );
 
-    return maps.map((map) => Transaction.fromMap(map)).toList();
+    return maps.map((map) => BudgetTransaction.fromMap(map)).toList();
   }
 
-  Future<int> updateTransaction(Transaction transaction) async {
+  Future<int> updateTransaction(BudgetTransaction transaction) async {
     final db = await database;
     return await db.update(
       'transactions',

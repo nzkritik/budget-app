@@ -1,4 +1,4 @@
-class Transaction {
+class BudgetTransaction {
   final int? id;
   final String type; // 'income' or 'expense'
   final double amount;
@@ -8,7 +8,7 @@ class Transaction {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Transaction({
+  BudgetTransaction({
     this.id,
     required this.type,
     required this.amount,
@@ -32,8 +32,8 @@ class Transaction {
     };
   }
 
-  factory Transaction.fromMap(Map<String, dynamic> map) {
-    return Transaction(
+  factory BudgetTransaction.fromMap(Map<String, dynamic> map) {
+    return BudgetTransaction(
       id: map['id'] as int?,
       type: map['type'] as String,
       amount: map['amount'] as double,
@@ -45,7 +45,7 @@ class Transaction {
     );
   }
 
-  Transaction copyWith({
+  BudgetTransaction copyWith({
     int? id,
     String? type,
     double? amount,
@@ -55,7 +55,7 @@ class Transaction {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Transaction(
+    return BudgetTransaction(
       id: id ?? this.id,
       type: type ?? this.type,
       amount: amount ?? this.amount,
