@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/transaction.dart';
 import '../utils/constants.dart';
 
@@ -16,7 +19,16 @@ class DatabaseService {
   }
 
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
+    String dbPath;
+    
+    // Use path_provider for desktop, getDatabasesPath for mobile
+    if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
+      final directory = await getApplicationDocumentsDirectory();
+      dbPath = directory.path;
+    } else {
+      dbPath = await getDatabasesPath();
+    }
+    
     final path = join(dbPath, filePath);
 
     return await openDatabase(
