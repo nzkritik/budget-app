@@ -5,7 +5,7 @@ import '../services/database_service.dart';
 import '../utils/constants.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
-  final Transaction? transaction;
+  final BudgetTransaction? transaction;
   final String? transactionType;
   final DateTime? selectedDate;
 
@@ -67,7 +67,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     final amount = double.parse(_amountController.text);
     final now = DateTime.now();
 
-    final transaction = Transaction(
+    final transaction = BudgetTransaction(
       id: widget.transaction?.id,
       type: _type,
       amount: amount,

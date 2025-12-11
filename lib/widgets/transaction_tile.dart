@@ -4,7 +4,7 @@ import '../utils/constants.dart';
 import '../utils/helpers.dart';
 
 class TransactionTile extends StatelessWidget {
-  final Transaction transaction;
+  final BudgetTransaction transaction;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
