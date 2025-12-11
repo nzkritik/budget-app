@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/transaction.dart';
+import '../utils/constants.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._init();
@@ -105,9 +106,9 @@ class DatabaseService {
     double totalExpenses = 0;
 
     for (var transaction in transactions) {
-      if (transaction.type == 'income') {
+      if (transaction.type == AppConstants.typeIncome) {
         totalIncome += transaction.amount;
-      } else if (transaction.type == 'expense') {
+      } else if (transaction.type == AppConstants.typeExpense) {
         totalExpenses += transaction.amount;
       }
     }

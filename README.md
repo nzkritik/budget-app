@@ -86,9 +86,8 @@ CREATE TABLE transactions (
 ## Dependencies
 
 - **sqflite**: SQLite database for Flutter
-- **path_provider**: For database file location
 - **intl**: Date formatting and currency display
-- **provider**: State management
+- **provider**: State management (included for future extensions)
 
 ## License
 
