@@ -261,4 +261,258 @@ class DatabaseService {
     await db.close();
     _database = null; // Reset the database instance
   }
+
+  // Developer Tools Methods
+  
+  /// Resets the database by deleting all transactions and resetting categories to defaults
+  Future<void> resetDatabase() async {
+    final db = await database;
+    
+    // Delete all transactions
+    await db.delete('transactions');
+    
+    // Delete all categories
+    await db.delete('categories');
+    
+    // Re-initialize default categories
+    await _initializeDefaultCategories(db);
+  }
+
+  /// Loads dummy data for testing and demo purposes
+  Future<int> loadDummyData() async {
+    final db = await database;
+    final now = DateTime.now();
+    int transactionsAdded = 0;
+    
+    // Get all categories to use in transactions
+    final incomeCategories = await getCategoriesByType(AppConstants.typeIncome);
+    final expenseCategories = await getCategoriesByType(AppConstants.typeExpense);
+    
+    if (incomeCategories.isEmpty || expenseCategories.isEmpty) {
+      throw Exception('Categories must be initialized before loading dummy data');
+    }
+    
+    // Generate transactions for the last 6 months
+    for (int monthOffset = 0; monthOffset < 6; monthOffset++) {
+      final monthDate = DateTime(now.year, now.month - monthOffset, 1);
+      
+      // Income Transactions
+      // Salary - monthly on 1st
+      final salaryAmount = 4500.0 + (monthOffset * 200.0); // Vary between 4500-5500
+      await _createDummyTransaction(
+        db,
+        AppConstants.typeIncome,
+        salaryAmount,
+        'Monthly Salary Payment',
+        'Salary',
+        DateTime(monthDate.year, monthDate.month, 1),
+      );
+      transactionsAdded++;
+      
+      // Rental Income - monthly on 5th
+      if (monthOffset % 2 == 0) { // Every other month
+        final rentalAmount = 1200.0 + (monthOffset * 100.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeIncome,
+          rentalAmount,
+          'Property Rental Income',
+          'Rental Income',
+          DateTime(monthDate.year, monthDate.month, 5),
+        );
+        transactionsAdded++;
+      }
+      
+      // Freelance - occasional
+      if (monthOffset % 3 == 0) {
+        final freelanceAmount = 200.0 + (monthOffset * 250.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeIncome,
+          freelanceAmount,
+          'Freelance Project',
+          'Freelance',
+          DateTime(monthDate.year, monthDate.month, 15),
+        );
+        transactionsAdded++;
+      }
+      
+      // Investments - occasional dividends
+      if (monthOffset % 4 == 0) {
+        final investmentAmount = 50.0 + (monthOffset * 80.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeIncome,
+          investmentAmount,
+          'Investment Dividends',
+          'Investments',
+          DateTime(monthDate.year, monthDate.month, 20),
+        );
+        transactionsAdded++;
+      }
+      
+      // Expense Transactions
+      // Mortgage - monthly
+      final mortgageAmount = 1800.0 + (monthOffset * 80.0);
+      await _createDummyTransaction(
+        db,
+        AppConstants.typeExpense,
+        mortgageAmount,
+        'Monthly Mortgage Payment',
+        'Mortgage',
+        DateTime(monthDate.year, monthDate.month, 1),
+      );
+      transactionsAdded++;
+      
+      // Utilities - monthly
+      final utilitiesAmount = 150.0 + (monthOffset * 25.0);
+      await _createDummyTransaction(
+        db,
+        AppConstants.typeExpense,
+        utilitiesAmount,
+        'Utilities Bill',
+        'Bills & Utilities',
+        DateTime(monthDate.year, monthDate.month, 10),
+      );
+      transactionsAdded++;
+      
+      // Management Fees - monthly
+      final managementAmount = 150.0 + (monthOffset * 30.0);
+      await _createDummyTransaction(
+        db,
+        AppConstants.typeExpense,
+        managementAmount,
+        'Property Management Fees',
+        'Management Fees',
+        DateTime(monthDate.year, monthDate.month, 15),
+      );
+      transactionsAdded++;
+      
+      // Food & Dining - multiple per month
+      final daysInMonth = DateTime(monthDate.year, monthDate.month + 1, 0).day;
+      for (int i = 0; i < 8; i++) {
+        final foodAmount = 50.0 + (i * 15.0);
+        int day = 3 + (i * 3);
+        if (day > daysInMonth) day = daysInMonth;
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          foodAmount,
+          i % 2 == 0 ? 'Grocery Shopping' : 'Restaurant Dining',
+          'Food & Dining',
+          DateTime(monthDate.year, monthDate.month, day),
+        );
+        transactionsAdded++;
+      }
+      
+      // Transportation - multiple per month
+      for (int i = 0; i < 5; i++) {
+        final transportAmount = 40.0 + (i * 20.0);
+        int day = 2 + (i * 5);
+        if (day > daysInMonth) day = daysInMonth;
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          transportAmount,
+          i % 2 == 0 ? 'Gas/Fuel' : 'Public Transport',
+          'Transportation',
+          DateTime(monthDate.year, monthDate.month, day),
+        );
+        transactionsAdded++;
+      }
+      
+      // Shopping - occasional
+      if (monthOffset % 2 == 0) {
+        final shoppingAmount = 100.0 + (monthOffset * 40.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          shoppingAmount,
+          'Shopping',
+          'Shopping',
+          DateTime(monthDate.year, monthDate.month, 18),
+        );
+        transactionsAdded++;
+      }
+      
+      // Entertainment - occasional
+      if (monthOffset % 2 == 1) {
+        final entertainmentAmount = 50.0 + (monthOffset * 10.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          entertainmentAmount,
+          'Entertainment',
+          'Entertainment',
+          DateTime(monthDate.year, monthDate.month, 22),
+        );
+        transactionsAdded++;
+      }
+      
+      // Healthcare - occasional
+      if (monthOffset % 3 == 0) {
+        final healthcareAmount = 100.0 + (monthOffset * 20.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          healthcareAmount,
+          'Medical Visit',
+          'Healthcare',
+          DateTime(monthDate.year, monthDate.month, 12),
+        );
+        transactionsAdded++;
+      }
+      
+      // Maintenance - occasional
+      if (monthOffset % 3 == 1) {
+        final maintenanceAmount = 200.0 + (monthOffset * 50.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          maintenanceAmount,
+          'Property Maintenance',
+          'Maintenance',
+          DateTime(monthDate.year, monthDate.month, 25),
+        );
+        transactionsAdded++;
+      }
+      
+      // Accountant - quarterly (every 3 months, but offset from healthcare)
+      if (monthOffset % 3 == 2) {
+        final accountantAmount = 300.0 + (monthOffset * 40.0);
+        await _createDummyTransaction(
+          db,
+          AppConstants.typeExpense,
+          accountantAmount,
+          'Accounting Services',
+          'Accountant',
+          DateTime(monthDate.year, monthDate.month, 28),
+        );
+        transactionsAdded++;
+      }
+    }
+    
+    return transactionsAdded;
+  }
+
+  /// Helper method to create a dummy transaction
+  Future<void> _createDummyTransaction(
+    Database db,
+    String type,
+    double amount,
+    String description,
+    String category,
+    DateTime date,
+  ) async {
+    final now = DateTime.now();
+    await db.insert('transactions', {
+      'type': type,
+      'amount': amount,
+      'description': description,
+      'category': category,
+      'date': date.toIso8601String(),
+      'created_at': now.toIso8601String(),
+      'updated_at': now.toIso8601String(),
+    });
+  }
 }

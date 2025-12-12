@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/backup_service.dart';
 import '../services/category_service.dart';
+import '../services/database_service.dart';
 import '../models/category.dart';
 import '../utils/constants.dart';
 
@@ -375,6 +376,113 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _resetDatabase() async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Database'),
+        content: const Text(
+          'This will permanently delete ALL transactions and reset categories to defaults. '
+          'This action cannot be undone. Are you sure?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isLoading = true);
+    
+    try {
+      await DatabaseService.instance.resetDatabase();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Database reset successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Reload categories to show default ones
+        await _loadCategories();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to reset database: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadDummyData() async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Load Dummy Data'),
+        content: const Text(
+          'This will add sample transactions to your database for testing purposes. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Load Data'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isLoading = true);
+    
+    try {
+      final count = await DatabaseService.instance.loadDummyData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully added $count sample transactions'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load dummy data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -635,6 +743,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         backgroundColor: AppConstants.expenseColor,
                         foregroundColor: Colors.white,
                       ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(thickness: 2, height: 32),
+            // Developer Tools Section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Developer Tools',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Reset Database Button
+                  Card(
+                    elevation: 2,
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.delete_forever,
+                        color: Colors.red,
+                        size: 32,
+                      ),
+                      title: const Text(
+                        'Reset Database',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Clear all data and reset\nto default settings',
+                      ),
+                      onTap: _isLoading ? null : _resetDatabase,
+                      enabled: !_isLoading,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Load Dummy Data Button
+                  Card(
+                    elevation: 2,
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.note_add,
+                        color: Colors.blue,
+                        size: 32,
+                      ),
+                      title: const Text(
+                        'Load Dummy Data',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Add sample transactions\nfor testing and demos',
+                      ),
+                      onTap: _isLoading ? null : _loadDummyData,
+                      enabled: !_isLoading,
                     ),
                   ),
                 ],
