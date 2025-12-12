@@ -10,6 +10,7 @@ A simple, single-user cross-platform budget application built with Flutter and S
 - **Backup & Restore**: Create database backups and restore from previous backups
 - **Local Storage**: All data persists locally using SQLite database
 - **Cross-Platform**: Runs on iOS, Android, Web, and Desktop
+    - **Note**: I can't test iOS or Mac version as I don't have a mac. I'm mainly testing the linux and web versions
 
 ## Getting Started
 
