@@ -52,11 +52,26 @@ All requirements from the problem statement have been successfully implemented.
 - ✅ Calendar picker for jumping to specific dates
 - ✅ Prevents navigation beyond current month
 
+### ✅ 5. Settings Screen with Backup/Restore
+- ✅ Settings screen accessible from dashboard
+- ✅ Create backup functionality with timestamped filenames
+- ✅ List all existing backups with:
+  - ✅ Backup filename
+  - ✅ Backup date and time
+  - ✅ File size (formatted as KB/MB)
+- ✅ Restore database from any backup
+- ✅ Delete backup files
+- ✅ Confirmation dialogs for restore and delete operations
+- ✅ Success/error messages for all operations
+- ✅ Empty state when no backups exist
+
 ## Technical Implementation
 
 ### ✅ Framework & Packages
 - ✅ **Flutter** - Cross-platform UI framework
 - ✅ **sqflite** (^2.3.0) - SQLite database for local storage
+- ✅ **sqflite_common_ffi** (^2.3.0+1) - Desktop SQLite support
+- ✅ **path_provider** (^2.1.1) - Access to application directories
 - ✅ **intl** (^0.18.1) - Date formatting and currency display
 - ✅ **provider** (^6.1.1) - Included for future state management needs
 
@@ -81,11 +96,13 @@ lib/
 ├── models/
 │   └── transaction.dart                ✅
 ├── services/
-│   └── database_service.dart           ✅
+│   ├── database_service.dart           ✅
+│   └── backup_service.dart             ✅
 ├── screens/
 │   ├── dashboard_screen.dart           ✅
 │   ├── transactions_screen.dart        ✅
-│   └── add_edit_transaction_screen.dart ✅
+│   ├── add_edit_transaction_screen.dart ✅
+│   └── settings_screen.dart            ✅
 ├── widgets/
 │   ├── transaction_tile.dart           ✅
 │   ├── stats_card.dart                 ✅
@@ -158,18 +175,20 @@ All acceptance criteria from the problem statement have been met:
 
 ## Files Created
 
-### Core Application (11 Dart files)
+### Core Application (13 Dart files)
 1. lib/main.dart
 2. lib/models/transaction.dart
 3. lib/services/database_service.dart
-4. lib/screens/dashboard_screen.dart
-5. lib/screens/transactions_screen.dart
-6. lib/screens/add_edit_transaction_screen.dart
-7. lib/widgets/transaction_tile.dart
-8. lib/widgets/stats_card.dart
-9. lib/widgets/month_year_picker.dart
-10. lib/utils/constants.dart
-11. lib/utils/helpers.dart
+4. lib/services/backup_service.dart
+5. lib/screens/dashboard_screen.dart
+6. lib/screens/transactions_screen.dart
+7. lib/screens/add_edit_transaction_screen.dart
+8. lib/screens/settings_screen.dart
+9. lib/widgets/transaction_tile.dart
+10. lib/widgets/stats_card.dart
+11. lib/widgets/month_year_picker.dart
+12. lib/utils/constants.dart
+13. lib/utils/helpers.dart
 
 ### Tests (3 files)
 1. test/transaction_test.dart
@@ -232,6 +251,11 @@ flutter build linux
 5. **Confirmation Dialogs**: Prevents accidental deletions
 6. **Responsive Design**: Works on phones, tablets, and desktop screens
 7. **Material Design 3**: Modern, clean UI following Google's latest design guidelines
+8. **Backup & Restore**: Complete backup/restore functionality for data protection
+   - Timestamped backup files for easy identification
+   - Backup files stored in ~/Documents/BudgetApp/backups/
+   - One-click restore from any backup
+   - Safe deletion with confirmation
 
 ## Security
 
@@ -258,6 +282,7 @@ While the current implementation meets all requirements, here are potential enha
 - Cloud backup/sync
 - Dark mode
 - Biometric authentication
+- Automated backup scheduling
 
 ## Conclusion
 

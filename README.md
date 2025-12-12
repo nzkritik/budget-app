@@ -7,6 +7,7 @@ A simple, single-user cross-platform budget application built with Flutter and S
 - **Dashboard Screen**: View current month's income, expenses, and balance at a glance
 - **Transaction Management**: Add, edit, and delete income and expense transactions
 - **Historical View**: Browse transactions by year and month
+- **Backup & Restore**: Create database backups and restore from previous backups
 - **Local Storage**: All data persists locally using SQLite database
 - **Cross-Platform**: Runs on iOS, Android, Web, and Desktop
 
@@ -67,11 +68,13 @@ lib/
 ├── models/
 │   └── transaction.dart                # Transaction data model
 ├── services/
-│   └── database_service.dart           # SQLite database operations
+│   ├── database_service.dart           # SQLite database operations
+│   └── backup_service.dart             # Backup and restore operations
 ├── screens/
 │   ├── dashboard_screen.dart           # Main dashboard
 │   ├── transactions_screen.dart        # Transaction list view
-│   └── add_edit_transaction_screen.dart # Add/Edit transaction form
+│   ├── add_edit_transaction_screen.dart # Add/Edit transaction form
+│   └── settings_screen.dart            # Settings with backup/restore
 ├── widgets/
 │   ├── transaction_tile.dart           # Transaction list item
 │   ├── stats_card.dart                 # Statistics card widget
@@ -101,6 +104,8 @@ CREATE TABLE transactions (
 ## Dependencies
 
 - **sqflite**: SQLite database for Flutter
+- **sqflite_common_ffi**: SQLite support for desktop platforms
+- **path_provider**: Access to application directories for backups
 - **intl**: Date formatting and currency display
 - **provider**: State management (included for future extensions)
 
