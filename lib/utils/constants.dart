@@ -22,6 +22,10 @@ class AppConstants {
     'Entertainment',
     'Healthcare',
     'Education',
+    'Mortgage',
+    'Management Fees',
+    'Accountant',
+    'Maintenance',
     'Other Expense',
   ];
 
