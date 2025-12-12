@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/transaction.dart';
 import '../services/database_service.dart';
+import '../services/category_service.dart';
 import '../utils/constants.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
   late DateTime _date;
   String? _category;
   bool _isLoading = false;
+  List<String> _categories = [];
 
   @override
   void initState() {
@@ -44,6 +46,24 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     _descriptionController = TextEditingController(
       text: widget.transaction?.description ?? '',
     );
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = _type == AppConstants.typeIncome
+          ? await CategoryService.instance.getIncomeCategoryNames()
+          : await CategoryService.instance.getExpenseCategoryNames();
+      setState(() {
+        _categories = categories;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load categories: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -51,12 +71,6 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     _amountController.dispose();
     _descriptionController.dispose();
     super.dispose();
-  }
-
-  List<String> get _categories {
-    return _type == AppConstants.typeIncome
-        ? AppConstants.incomeCategories
-        : AppConstants.expenseCategories;
   }
 
   Future<void> _saveTransaction() async {
@@ -170,6 +184,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                             _type = selected.first;
                             _category = null;
                           });
+                          _loadCategories();
                         },
                       ),
                       const SizedBox(height: 24),
