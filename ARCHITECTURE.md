@@ -21,12 +21,18 @@ Contains business logic and data access layers.
   - CRUD operations for transactions
   - Monthly statistics calculations
   - Uses sqflite package for database access
+- `backup_service.dart`: Singleton service for database backup and restore operations
+  - Create timestamped backups of the database
+  - Restore database from backup files
+  - List, delete, and manage backup files
+  - Uses path_provider for cross-platform directory access
 
 ### Screens (`lib/screens/`)
 Main application screens that represent complete pages.
 - `dashboard_screen.dart`: Shows monthly summary with income, expenses, and balance
 - `transactions_screen.dart`: Lists all transactions for a selected month with filtering
 - `add_edit_transaction_screen.dart`: Form for adding new or editing existing transactions
+- `settings_screen.dart`: Settings screen with database backup and restore functionality
 
 ### Widgets (`lib/widgets/`)
 Reusable UI components used across multiple screens.
@@ -62,6 +68,17 @@ Utility classes and helper functions.
 3. Changes are saved via `DatabaseService.updateTransaction`
 4. For delete: Confirmation dialog appears
 5. If confirmed, transaction is deleted via `DatabaseService.deleteTransaction`
+
+### Backup and Restore
+1. User taps settings icon in the dashboard AppBar
+2. `SettingsScreen` opens and displays list of existing backups
+3. User can create a backup by tapping "Create Backup" button
+4. Backup is created via `BackupService.createBackup` with a timestamped filename
+5. User can restore from a backup by tapping the restore icon
+6. Confirmation dialog appears
+7. If confirmed, database is restored via `BackupService.restoreFromBackup`
+8. User returns to dashboard with refreshed data
+9. User can also delete backups with confirmation
 
 ## Database Schema
 
@@ -157,3 +174,5 @@ No global state management library is needed for this simple app, though the pro
 - Multi-currency support
 - Cloud backup/sync
 - Receipt attachments
+- Automated backup scheduling
+- Backup encryption
