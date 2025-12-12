@@ -4,6 +4,7 @@ import '../utils/constants.dart';
 import '../utils/helpers.dart';
 import '../widgets/stats_card.dart';
 import 'transactions_screen.dart';
+import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -46,6 +47,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Budget App'),
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+              // If a backup was restored, reload stats
+              if (result == true) {
+                _loadStats();
+              }
+            },
+            tooltip: 'Settings',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
