@@ -8,9 +8,9 @@ class AppConstants {
   // Default categories
   static const List<String> incomeCategories = [
     'Salary',
-    'Business',
+    'Freelance',
     'Investments',
-    'Gifts',
+    'Rental Income',
     'Other Income',
   ];
 
@@ -18,10 +18,11 @@ class AppConstants {
     'Food & Dining',
     'Shopping',
     'Transportation',
-    'Bills & Utilities',
     'Entertainment',
+    'Bills & Utilities',
     'Healthcare',
     'Education',
+    'Travel',
     'Mortgage',
     'Management Fees',
     'Accountant',

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/backup_service.dart';
+import '../services/category_service.dart';
+import '../models/category.dart';
 import '../utils/constants.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -14,11 +16,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<BackupInfo> _backups = [];
   bool _isLoading = false;
   String? _errorMessage;
+  List<Category> _incomeCategories = [];
+  List<Category> _expenseCategories = [];
 
   @override
   void initState() {
     super.initState();
     _loadBackups();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final income = await CategoryService.instance.getCategoriesByType(AppConstants.typeIncome);
+      final expense = await CategoryService.instance.getCategoriesByType(AppConstants.typeExpense);
+      setState(() {
+        _incomeCategories = income;
+        _expenseCategories = expense;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load categories: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _loadBackups() async {
@@ -188,6 +210,171 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
+  Future<void> _showAddCategoryDialog(String type) async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Add ${type == AppConstants.typeIncome ? 'Income' : 'Expense'} Category'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Category Name',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      try {
+        await CategoryService.instance.addCategory(result, type);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category added successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        await _loadCategories();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to add category: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _showEditCategoryDialog(Category category) async {
+    final controller = TextEditingController(text: category.name);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${category.type == AppConstants.typeIncome ? 'Income' : 'Expense'} Category'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Category Name',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && result != category.name) {
+      try {
+        await CategoryService.instance.updateCategory(category.id!, result);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category updated successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        await _loadCategories();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update category: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _deleteCategory(Category category) async {
+    if (category.isDefault) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot delete default category'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Category'),
+        content: Text(
+          'Are you sure you want to delete "${category.name}"?\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await CategoryService.instance.deleteCategory(category.id!);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        await _loadCategories();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete category: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,147 +383,265 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          // Create Backup Button
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _createBackup,
-                icon: const Icon(Icons.backup),
-                label: const Text('Create Backup'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ),
-          ),
-
-          // Error message
-          if (_errorMessage != null)
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Database Backup & Restore Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Card(
-                color: Colors.red.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Database Backup & Restore',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ),
-            ),
-
-          // Backups List
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _backups.isEmpty
-                    ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _createBackup,
+                      icon: const Icon(Icons.backup),
+                      label: const Text('Create Backup'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        backgroundColor: AppConstants.primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Error message
+                  if (_errorMessage != null)
+                    Card(
+                      color: Colors.red.shade50,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
                           children: [
-                            Icon(
-                              Icons.backup_outlined,
-                              size: 64,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'No backups found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Create a backup to get started',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
+                            const Icon(Icons.error, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: const TextStyle(color: Colors.red),
                               ),
                             ),
                           ],
                         ),
-                      )
-                    : ListView.builder(
-                        itemCount: _backups.length,
-                        itemBuilder: (context, index) {
-                          final backup = _backups[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: ListTile(
-                              leading: const Icon(
-                                Icons.storage,
-                                color: AppConstants.primaryColor,
-                              ),
-                              title: Text(
-                                backup.filename,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    DateFormat('MMM dd, yyyy HH:mm:ss')
-                                        .format(backup.date),
-                                  ),
-                                  Text(
-                                    'Size: ${_formatFileSize(backup.size)}',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.restore),
-                                    color: Colors.orange,
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () => _restoreBackup(backup),
-                                    tooltip: 'Restore',
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    color: Colors.red,
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () => _deleteBackup(backup),
-                                    tooltip: 'Delete',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
                       ),
-          ),
-        ],
+                    ),
+                  // Backups List
+                  SizedBox(
+                    height: 300,
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _backups.isEmpty
+                            ? const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.backup_outlined,
+                                      size: 64,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'No backups found',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: _backups.length,
+                                itemBuilder: (context, index) {
+                                  final backup = _backups[index];
+                                  return Card(
+                                    margin: const EdgeInsets.symmetric(vertical: 8),
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.storage,
+                                        color: AppConstants.primaryColor,
+                                      ),
+                                      title: Text(
+                                        backup.filename,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            DateFormat('MMM dd, yyyy HH:mm:ss')
+                                                .format(backup.date),
+                                          ),
+                                          Text(
+                                            'Size: ${_formatFileSize(backup.size)}',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.restore),
+                                            color: Colors.orange,
+                                            onPressed: _isLoading
+                                                ? null
+                                                : () => _restoreBackup(backup),
+                                            tooltip: 'Restore',
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete),
+                                            color: Colors.red,
+                                            onPressed: _isLoading
+                                                ? null
+                                                : () => _deleteBackup(backup),
+                                            tooltip: 'Delete',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(thickness: 2, height: 32),
+            // Transaction Categories Section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Transaction Categories',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Income Categories
+                  const Text(
+                    'Income Categories:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ..._incomeCategories.map((category) => Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
+                      title: Text(category.name),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            color: Colors.blue,
+                            onPressed: () => _showEditCategoryDialog(category),
+                            tooltip: 'Edit',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            color: category.isDefault ? Colors.grey : Colors.red,
+                            onPressed: category.isDefault
+                                ? null
+                                : () => _deleteCategory(category),
+                            tooltip: category.isDefault
+                                ? 'Cannot delete default'
+                                : 'Delete',
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddCategoryDialog(AppConstants.typeIncome),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Income Category'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.incomeColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Expense Categories
+                  const Text(
+                    'Expense Categories:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ..._expenseCategories.map((category) => Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
+                      title: Text(category.name),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            color: Colors.blue,
+                            onPressed: () => _showEditCategoryDialog(category),
+                            tooltip: 'Edit',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            color: category.isDefault ? Colors.grey : Colors.red,
+                            onPressed: category.isDefault
+                                ? null
+                                : () => _deleteCategory(category),
+                            tooltip: category.isDefault
+                                ? 'Cannot delete default'
+                                : 'Delete',
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddCategoryDialog(AppConstants.typeExpense),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Expense Category'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.expenseColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
