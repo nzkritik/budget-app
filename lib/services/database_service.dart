@@ -389,16 +389,18 @@ class DatabaseService {
       transactionsAdded++;
       
       // Food & Dining - multiple per month
+      final daysInMonth = DateTime(monthDate.year, monthDate.month + 1, 0).day;
       for (int i = 0; i < 8; i++) {
         final foodAmount = 50.0 + (i * 15.0);
-        final day = 3 + (i * 3);
+        int day = 3 + (i * 3);
+        if (day > daysInMonth) day = daysInMonth;
         await _createDummyTransaction(
           db,
           AppConstants.typeExpense,
           foodAmount,
           i % 2 == 0 ? 'Grocery Shopping' : 'Restaurant Dining',
           'Food & Dining',
-          DateTime(monthDate.year, monthDate.month, day > 28 ? 28 : day),
+          DateTime(monthDate.year, monthDate.month, day),
         );
         transactionsAdded++;
       }
@@ -406,14 +408,15 @@ class DatabaseService {
       // Transportation - multiple per month
       for (int i = 0; i < 5; i++) {
         final transportAmount = 40.0 + (i * 20.0);
-        final day = 2 + (i * 5);
+        int day = 2 + (i * 5);
+        if (day > daysInMonth) day = daysInMonth;
         await _createDummyTransaction(
           db,
           AppConstants.typeExpense,
           transportAmount,
           i % 2 == 0 ? 'Gas/Fuel' : 'Public Transport',
           'Transportation',
-          DateTime(monthDate.year, monthDate.month, day > 28 ? 28 : day),
+          DateTime(monthDate.year, monthDate.month, day),
         );
         transactionsAdded++;
       }
@@ -474,8 +477,8 @@ class DatabaseService {
         transactionsAdded++;
       }
       
-      // Accountant - quarterly (every 3 months)
-      if (monthOffset % 3 == 0) {
+      // Accountant - quarterly (every 3 months, but offset from healthcare)
+      if (monthOffset % 3 == 2) {
         final accountantAmount = 300.0 + (monthOffset * 40.0);
         await _createDummyTransaction(
           db,
