@@ -8,7 +8,7 @@ class CategoryService {
   CategoryService._init();
 
   // Get all categories by type
-  Future<List<Category>> getCategoriesByType(String type) async {
+  Future<List<BudgetCategory>> getCategoriesByType(String type) async {
     return await DatabaseService.instance.getCategoriesByType(type);
   }
 
@@ -20,7 +20,7 @@ class CategoryService {
       throw Exception('Category "$name" already exists for $type');
     }
 
-    final category = Category(
+    final category = BudgetCategory(
       name: name,
       type: type,
       isDefault: false,

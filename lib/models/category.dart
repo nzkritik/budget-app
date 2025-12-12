@@ -1,11 +1,11 @@
-class Category {
+class BudgetCategory {
   final int? id;
   final String name;
   final String type; // 'income' or 'expense'
   final bool isDefault; // prevents deletion of default categories
   final DateTime createdAt;
 
-  Category({
+  BudgetCategory({
     this.id,
     required this.name,
     required this.type,
@@ -23,8 +23,8 @@ class Category {
     };
   }
 
-  factory Category.fromMap(Map<String, dynamic> map) {
-    return Category(
+  factory BudgetCategory.fromMap(Map<String, dynamic> map) {
+    return BudgetCategory(
       id: map['id'] as int?,
       name: map['name'] as String,
       type: map['type'] as String,
@@ -33,14 +33,14 @@ class Category {
     );
   }
 
-  Category copyWith({
+  BudgetCategory copyWith({
     int? id,
     String? name,
     String? type,
     bool? isDefault,
     DateTime? createdAt,
   }) {
-    return Category(
+    return BudgetCategory(
       id: id ?? this.id,
       name: name ?? this.name,
       type: type ?? this.type,

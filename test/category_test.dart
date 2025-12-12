@@ -5,7 +5,7 @@ void main() {
   group('Category Model Tests', () {
     test('Category creation', () {
       final now = DateTime.now();
-      final category = Category(
+      final category = BudgetCategory(
         name: 'Salary',
         type: 'income',
         isDefault: true,
@@ -20,7 +20,7 @@ void main() {
 
     test('Category toMap', () {
       final now = DateTime.now();
-      final category = Category(
+      final category = BudgetCategory(
         id: 1,
         name: 'Food',
         type: 'expense',
@@ -38,7 +38,7 @@ void main() {
 
     test('Category toMap with default category', () {
       final now = DateTime.now();
-      final category = Category(
+      final category = BudgetCategory(
         id: 2,
         name: 'Salary',
         type: 'income',
@@ -60,7 +60,7 @@ void main() {
         'created_at': now.toIso8601String(),
       };
 
-      final category = Category.fromMap(map);
+      final category = BudgetCategory.fromMap(map);
       expect(category.id, 1);
       expect(category.name, 'Entertainment');
       expect(category.type, 'expense');
@@ -77,13 +77,13 @@ void main() {
         'created_at': now.toIso8601String(),
       };
 
-      final category = Category.fromMap(map);
+      final category = BudgetCategory.fromMap(map);
       expect(category.isDefault, true);
     });
 
     test('Category copyWith', () {
       final now = DateTime.now();
-      final category = Category(
+      final category = BudgetCategory(
         id: 1,
         name: 'Old Name',
         type: 'income',

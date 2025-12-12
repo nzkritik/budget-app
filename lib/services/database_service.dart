@@ -190,7 +190,7 @@ class DatabaseService {
   }
 
   // Category CRUD operations
-  Future<List<Category>> getCategoriesByType(String type) async {
+  Future<List<BudgetCategory>> getCategoriesByType(String type) async {
     final db = await database;
     final maps = await db.query(
       'categories',
@@ -198,15 +198,15 @@ class DatabaseService {
       whereArgs: [type],
       orderBy: 'name ASC',
     );
-    return maps.map((map) => Category.fromMap(map)).toList();
+    return maps.map((map) => BudgetCategory.fromMap(map)).toList();
   }
 
-  Future<int> createCategory(Category category) async {
+  Future<int> createCategory(BudgetCategory category) async {
     final db = await database;
     return await db.insert('categories', category.toMap());
   }
 
-  Future<Category?> readCategory(int id) async {
+  Future<BudgetCategory?> readCategory(int id) async {
     final db = await database;
     final maps = await db.query(
       'categories',
@@ -215,12 +215,12 @@ class DatabaseService {
     );
 
     if (maps.isNotEmpty) {
-      return Category.fromMap(maps.first);
+      return BudgetCategory.fromMap(maps.first);
     }
     return null;
   }
 
-  Future<int> updateCategory(Category category) async {
+  Future<int> updateCategory(BudgetCategory category) async {
     final db = await database;
     return await db.update(
       'categories',
