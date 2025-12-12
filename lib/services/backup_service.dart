@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
@@ -26,14 +25,7 @@ class BackupService {
 
   /// Get the backups directory path (e.g., ~/Documents/BudgetApp/backups/)
   Future<Directory> getBackupsDirectory() async {
-    final Directory baseDir;
-    
-    if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
-      baseDir = await getApplicationDocumentsDirectory();
-    } else {
-      // For mobile, use app documents directory
-      baseDir = await getApplicationDocumentsDirectory();
-    }
+    final baseDir = await getApplicationDocumentsDirectory();
     
     final backupsDir = Directory(join(baseDir.path, 'BudgetApp', 'backups'));
     
@@ -78,14 +70,8 @@ class BackupService {
     await DatabaseService.instance.close();
     
     // Get the current database path
-    String dbPath;
-    if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
-      final directory = await getApplicationDocumentsDirectory();
-      dbPath = join(directory.path, 'budget.db');
-    } else {
-      final directory = await getApplicationDocumentsDirectory();
-      dbPath = join(directory.path, 'budget.db');
-    }
+    final directory = await getApplicationDocumentsDirectory();
+    final dbPath = join(directory.path, 'budget.db');
     
     // Copy backup file over the current database
     await backupFile.copy(dbPath);
