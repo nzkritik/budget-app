@@ -16,8 +16,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<BackupInfo> _backups = [];
   bool _isLoading = false;
   String? _errorMessage;
-  List<Category> _incomeCategories = [];
-  List<Category> _expenseCategories = [];
+  List<BudgetCategory> _incomeCategories = [];
+  List<BudgetCategory> _expenseCategories = [];
 
   @override
   void initState() {
@@ -262,7 +262,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _showEditCategoryDialog(Category category) async {
+  Future<void> _showEditCategoryDialog(BudgetCategory category) async {
     final controller = TextEditingController(text: category.name);
     final result = await showDialog<String>(
       context: context,
@@ -314,7 +314,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _deleteCategory(Category category) async {
+  Future<void> _deleteCategory(BudgetCategory category) async {
     if (category.isDefault) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
