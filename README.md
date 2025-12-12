@@ -17,23 +17,38 @@ A simple, single-user cross-platform budget application built with Flutter and S
 - Flutter SDK (3.0.0 or higher)
 - Dart SDK (3.0.0 or higher)
 
-### Installation
+## Setup
 
 1. Clone the repository:
-```bash
-git clone https://github.com/nzkritik/budget-app.git
-cd budget-app
-```
+   ```bash
+   git clone https://github.com/nzkritik/budget-app.git
+   cd budget-app
+   ```
 
-2. Install dependencies:
-```bash
-flutter pub get
-```
+2. Generate platform files for your target platform:
+   ```bash
+   # For Linux
+   flutter create --platforms=linux .
+   
+   # For Windows
+   flutter create --platforms=windows .
+   
+   # For macOS
+   flutter create --platforms=macos .
+   
+   # For Android/iOS (usually already included)
+   flutter create --platforms=android,ios .
+   ```
 
-3. Run the app:
-```bash
-flutter run
-```
+3. Get dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+4. Run the app:
+   ```bash
+   flutter run
+   ```
 
 ### Building for Different Platforms
 
